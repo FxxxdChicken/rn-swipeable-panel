@@ -9,6 +9,11 @@ const FULL_HEIGHT = Dimensions.get('window').height;
 const FULL_WIDTH = Dimensions.get('window').width;
 const CONTAINER_HEIGHT = FULL_HEIGHT - 100;
 
+const SMALL_HEIGHT = 100; 		// FULL_HEIGHT - 400
+const MEDIUM_HEIGHT = FULL_HEIGHT - 400;
+const LARGE_HEIGHT = FULL_HEIGHT - 100;
+
+
 export default class SwipeablePanel extends React.Component {
 	static propTypes = {
 		isActive: PropTypes.bool.isRequired,
@@ -85,15 +90,27 @@ export default class SwipeablePanel extends React.Component {
 		this.oldPan = { x: 0, y: 0 };
 	};
 
-	_animateToSmallPanel = () => {
+	_animateToMediumPanel = () => {
 		Animated.spring(this.pan, {
-			toValue: { x: 0, y: FULL_HEIGHT - 400 },
+			toValue: { x: 0, y: MEDIUM_HEIGHT },
+			easing: Easing.bezier(0.05, 1.35, 0.2, 0.95),
+			duration: 200,
+			useNativeDriver: true
+		}).start();
+		this.setState({ canScroll: true, status: 2 });
+		this.oldPan = { x: 0, y: MEDIUM_HEIGHT };
+	};
+
+	_animateToSmallPanel = () => {
+
+		Animated.spring(this.pan, {
+			toValue: { x: 0, y: SMALL_HEIGHT },
 			easing: Easing.bezier(0.05, 1.35, 0.2, 0.95),
 			duration: 300,
 			useNativeDriver: true
 		}).start();
 		this.setState({ status: 1 });
-		this.oldPan = { x: 0, y: FULL_HEIGHT - 400 };
+		this.oldPan = { x: 0, y: SMALL_HEIGHT };
 	};
 
 	openLarge = () => {
@@ -119,7 +136,7 @@ export default class SwipeablePanel extends React.Component {
 		this.setState({ showComponent: true, status: 1 });
 		Animated.parallel([
 			Animated.timing(this.pan, {
-				toValue: { x: 0, y: FULL_HEIGHT - 400 },
+				toValue: { x: 0, y: MEDIUM_HEIGHT },
 				easing: Easing.bezier(0.05, 1.35, 0.2, 0.95),
 				duration: 500,
 				useNativeDriver: true
@@ -131,7 +148,7 @@ export default class SwipeablePanel extends React.Component {
 				useNativeDriver: true
 			}).start()
 		]);
-		this.oldPan = { x: 0, y: FULL_HEIGHT - 400 };
+		this.oldPan = { x: 0, y: MEDIUM_HEIGHT };
 	};
 
 	closeDetails = (isCloseButtonPress) => {
