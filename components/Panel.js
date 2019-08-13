@@ -9,6 +9,10 @@ const FULL_HEIGHT = Dimensions.get('window').height;
 const FULL_WIDTH = Dimensions.get('window').width;
 const CONTAINER_HEIGHT = FULL_HEIGHT - 100;
 
+const SMALL_HEIGHT = FULL_HEIGHT-250; 		// FULL_HEIGHT - 400
+const MEDIUM_HEIGHT = FULL_HEIGHT-FULL_HEIGHT/5*3;
+const LARGE_HEIGHT = FULL_HEIGHT - 100;
+
 export default class SwipeablePanel extends React.Component {
 	static propTypes = {
 		isActive: PropTypes.bool.isRequired,
@@ -24,7 +28,7 @@ export default class SwipeablePanel extends React.Component {
 			showComponent: false,
 			opacity: new Animated.Value(0),
 			canScroll: false,
-			status: 0 // {0: close, 1: small, 2: large}
+			status: 0 // {0: close, 1: small, 2: large, 3: midum } 
 		};
 		this.pan = new Animated.ValueXY({ x: 0, y: FULL_HEIGHT });
 		this.oldPan = { x: 0, y: 0 };
@@ -32,8 +36,9 @@ export default class SwipeablePanel extends React.Component {
 		this._panResponder = PanResponder.create({
 			onStartShouldSetPanResponder: (evt, gestureState) => true,
 			onPanResponderGrant: (evt, gestureState) => {
-				if (this.state.status == 1) this.pan.setOffset({ x: this.pan.x._value, y: FULL_HEIGHT - 400 });
+				if (this.state.status == 1) this.pan.setOffset({ x: this.pan.x._value, y: SMALL_HEIGHT });
 				else if (this.state.status == 2) this.pan.setOffset({ x: this.pan.x._value, y: 0 });
+				else if (this.state.status == 3) this.pan.setOffset({ x: this.pan.x._value, y: MEDIUM_HEIGHT });
 				this.pan.setValue({ x: 0, y: 0 });
 			},
 			onPanResponderMove: (evt, gestureState) => {
@@ -45,14 +50,18 @@ export default class SwipeablePanel extends React.Component {
 
 				const distance = this.oldPan.y - this.pan.y._value;
 				const absDistance = Math.abs(distance);
-
-				if (this.state.status == 2) {
+				
+				if (this.state.status == 3) {
+					if (0 < absDistance && absDistance < 100) this._animateToMediumPanel();
+					else if (100 < absDistance && absDistance < CONTAINER_HEIGHT - 200) this._animateToLargePanel();
+					else if (CONTAINER_HEIGHT - 200 < absDistance) this._animateClosingAndOnCloseProp();
+				} else if (this.state.status == 2) {
 					if (0 < absDistance && absDistance < 100) this._animateToLargePanel();
 					else if (100 < absDistance && absDistance < CONTAINER_HEIGHT - 200) this._animateToSmallPanel();
 					else if (CONTAINER_HEIGHT - 200 < absDistance) this._animateClosingAndOnCloseProp();
 				} else {
 					if (distance < -100) this._animateClosingAndOnCloseProp(false);
-					else if (distance > 0 && distance > 50) this._animateToLargePanel();
+					else if (distance > 0 && distance > 50) this._animateToMediumPanel();
 					else this._animateToSmallPanel();
 				}
 			}
@@ -85,15 +94,26 @@ export default class SwipeablePanel extends React.Component {
 		this.oldPan = { x: 0, y: 0 };
 	};
 
+	_animateToMediumPanel = () => {
+		Animated.spring(this.pan, {
+			toValue: { x: 0, y: MEDIUM_HEIGHT },
+			easing: Easing.bezier(0.05, 1.35, 0.2, 0.95),
+			duration: 300,
+			useNativeDriver: true
+		}).start();
+		this.setState({ status: 3 });
+		this.oldPan = { x: 0, y: MEDIUM_HEIGHT};
+	};
+
 	_animateToSmallPanel = () => {
 		Animated.spring(this.pan, {
-			toValue: { x: 0, y: FULL_HEIGHT - 400 },
+			toValue: { x: 0, y: SMALL_HEIGHT },
 			easing: Easing.bezier(0.05, 1.35, 0.2, 0.95),
 			duration: 300,
 			useNativeDriver: true
 		}).start();
 		this.setState({ status: 1 });
-		this.oldPan = { x: 0, y: FULL_HEIGHT - 400 };
+		this.oldPan = { x: 0, y: SMALL_HEIGHT};
 	};
 
 	openLarge = () => {
@@ -119,7 +139,7 @@ export default class SwipeablePanel extends React.Component {
 		this.setState({ showComponent: true, status: 1 });
 		Animated.parallel([
 			Animated.timing(this.pan, {
-				toValue: { x: 0, y: FULL_HEIGHT - 400 },
+				toValue: { x: 0, y: SMALL_HEIGHT  },
 				easing: Easing.bezier(0.05, 1.35, 0.2, 0.95),
 				duration: 500,
 				useNativeDriver: true
@@ -131,7 +151,7 @@ export default class SwipeablePanel extends React.Component {
 				useNativeDriver: true
 			}).start()
 		]);
-		this.oldPan = { x: 0, y: FULL_HEIGHT - 400 };
+		this.oldPan = { x: 0, y: SMALL_HEIGHT };
 	};
 
 	closeDetails = (isCloseButtonPress) => {
