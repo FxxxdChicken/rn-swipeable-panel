@@ -50,18 +50,19 @@ export default class SwipeablePanel extends React.Component {
 
 				const distance = this.oldPan.y - this.pan.y._value;
 				const absDistance = Math.abs(distance);
-				
+
 				if (this.state.status == 3) {
-					if (0 < absDistance && absDistance < 100) this._animateToMediumPanel();
-					else if (100 < absDistance && absDistance < CONTAINER_HEIGHT - 200) this._animateToLargePanel();
-					else if (CONTAINER_HEIGHT - 200 < absDistance) this._animateClosingAndOnCloseProp();
+					if (distance < -100) this._animateToSmallPanel(false);
+					else if (distance > 100) this._animateToLargePanel();
+					else this._animateToMediumPanel();
 				} else if (this.state.status == 2) {
 					if (0 < absDistance && absDistance < 100) this._animateToLargePanel();
-					else if (100 < absDistance && absDistance < CONTAINER_HEIGHT - 200) this._animateToSmallPanel();
-					else if (CONTAINER_HEIGHT - 200 < absDistance) this._animateClosingAndOnCloseProp();
+					else if (100 < absDistance && absDistance < CONTAINER_HEIGHT - 200) this._animateToMediumPanel();
+					else if (CONTAINER_HEIGHT - 200 < absDistance) this._animateToSmallPanel();
 				} else {
 					if (distance < -100) this._animateClosingAndOnCloseProp(false);
-					else if (distance > 0 && distance > 50) this._animateToMediumPanel();
+					else if (distance > 200) this._animateToLargePanel(false);
+					else if (distance > 100) this._animateToMediumPanel(false);
 					else this._animateToSmallPanel();
 				}
 			}
