@@ -9,9 +9,10 @@ const FULL_HEIGHT = Dimensions.get('window').height;
 const FULL_WIDTH = Dimensions.get('window').width;
 const CONTAINER_HEIGHT = FULL_HEIGHT - 100;
 
-const SMALL_HEIGHT = FULL_HEIGHT-250; 		// FULL_HEIGHT - 400
-const MEDIUM_HEIGHT = FULL_HEIGHT-FULL_HEIGHT/5*3;
-const LARGE_HEIGHT = FULL_HEIGHT - 100;
+const SMALL_HEIGHT = FULL_HEIGHT + 150; 		// FULL_HEIGHT - 400
+const MEDIUM_HEIGHT = FULL_HEIGHT - 100;
+const LARGE_HEIGHT = FULL_HEIGHT - 400;
+
 
 export default class SwipeablePanel extends React.Component {
 	static propTypes = {
@@ -28,16 +29,17 @@ export default class SwipeablePanel extends React.Component {
 			showComponent: false,
 			opacity: new Animated.Value(0),
 			canScroll: false,
-			status: 0 // {0: close, 1: small, 2: large, 3: midum } 
+			status: 0 // {0: close, 1: small, 2: large, 3: medium } 
 		};
 		this.pan = new Animated.ValueXY({ x: 0, y: FULL_HEIGHT });
 		this.oldPan = { x: 0, y: 0 };
 
 		this._panResponder = PanResponder.create({
 			onStartShouldSetPanResponder: (evt, gestureState) => true,
+
 			onPanResponderGrant: (evt, gestureState) => {
 				if (this.state.status == 1) this.pan.setOffset({ x: this.pan.x._value, y: SMALL_HEIGHT });
-				else if (this.state.status == 2) this.pan.setOffset({ x: this.pan.x._value, y: 0 });
+				else if (this.state.status == 2) this.pan.setOffset({ x: this.pan.x._value, y: LARGE_HEIGHT });
 				else if (this.state.status == 3) this.pan.setOffset({ x: this.pan.x._value, y: MEDIUM_HEIGHT });
 				this.pan.setValue({ x: 0, y: 0 });
 			},
@@ -50,7 +52,6 @@ export default class SwipeablePanel extends React.Component {
 
 				const distance = this.oldPan.y - this.pan.y._value;
 				const absDistance = Math.abs(distance);
-
 				if (this.state.status == 3) {
 					if (distance < -100) this._animateToSmallPanel(false);
 					else if (distance > 100) this._animateToLargePanel();
@@ -60,8 +61,8 @@ export default class SwipeablePanel extends React.Component {
 					else if (100 < absDistance && absDistance < CONTAINER_HEIGHT - 200) this._animateToMediumPanel();
 					else if (CONTAINER_HEIGHT - 200 < absDistance) this._animateToSmallPanel();
 				} else {
-					if (distance < -100) this._animateClosingAndOnCloseProp(false);
-					else if (distance > 200) this._animateToLargePanel(false);
+					// if (distance < -100) this._animateClosingAndOnCloseProp(false);
+					if (distance > 200) this._animateToLargePanel(false);
 					else if (distance > 100) this._animateToMediumPanel(false);
 					else this._animateToSmallPanel();
 				}
@@ -86,13 +87,13 @@ export default class SwipeablePanel extends React.Component {
 
 	_animateToLargePanel = () => {
 		Animated.spring(this.pan, {
-			toValue: { x: 0, y: 0 },
+			toValue: { x: 0, y: LARGE_HEIGHT },
 			easing: Easing.bezier(0.05, 1.35, 0.2, 0.95),
 			duration: 200,
 			useNativeDriver: true
 		}).start();
 		this.setState({ canScroll: true, status: 2 });
-		this.oldPan = { x: 0, y: 0 };
+		this.oldPan = { x: 0, y: LARGE_HEIGHT };
 	};
 
 	_animateToMediumPanel = () => {
@@ -153,6 +154,7 @@ export default class SwipeablePanel extends React.Component {
 			}).start()
 		]);
 		this.oldPan = { x: 0, y: SMALL_HEIGHT };
+		console.log('1-1')
 	};
 
 	closeDetails = (isCloseButtonPress) => {
@@ -175,6 +177,7 @@ export default class SwipeablePanel extends React.Component {
 			this.setState({ showComponent: false, canScroll: false, status: 0 });
 			if (this.props.onClose != 'undefined' && this.props.onClose) this.props.onClose();
 		}, this.state.status == 2 ? 450 : 250);
+		console.log('1-2')
 	};
 
 	onPressCloseButton = () => {
@@ -188,8 +191,8 @@ export default class SwipeablePanel extends React.Component {
 		return showComponent ? (
 			<Animated.View
 				style={[
-					SwipeablePanelStyles.background,
-					{ opacity, backgroundColor: noBackgroundOpacity ? 'rgba(0,0,0,0)' : 'rgba(0,0,0,0.5)' }
+					SwipeablePanelStyles.background ,
+					{ opacity, height: 0, backgroundColor: noBackgroundOpacity ? 'rgba(0,0,0,0)' : 'rgba(0,0,0,0.5)' }
 				]}
 			>
 				<Animated.View
