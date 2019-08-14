@@ -103,7 +103,7 @@ export default class SwipeablePanel extends React.Component {
 			duration: 300,
 			useNativeDriver: true
 		}).start();
-		this.setState({ status: 3 });
+		this.setState({ canScroll: true, status: 3 });
 		this.oldPan = { x: 0, y: MEDIUM_HEIGHT};
 	};
 
@@ -154,7 +154,6 @@ export default class SwipeablePanel extends React.Component {
 			}).start()
 		]);
 		this.oldPan = { x: 0, y: SMALL_HEIGHT };
-		console.log('1-1')
 	};
 
 	closeDetails = (isCloseButtonPress) => {
@@ -177,7 +176,6 @@ export default class SwipeablePanel extends React.Component {
 			this.setState({ showComponent: false, canScroll: false, status: 0 });
 			if (this.props.onClose != 'undefined' && this.props.onClose) this.props.onClose();
 		}, this.state.status == 2 ? 450 : 250);
-		console.log('1-2')
 	};
 
 	onPressCloseButton = () => {
