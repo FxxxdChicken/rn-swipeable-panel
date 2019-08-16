@@ -9,9 +9,9 @@ const FULL_HEIGHT = Dimensions.get('window').height;
 const FULL_WIDTH = Dimensions.get('window').width;
 const CONTAINER_HEIGHT = FULL_HEIGHT - 100;
 
-const SMALL_HEIGHT = FULL_HEIGHT + 150; 		// FULL_HEIGHT - 400
-const MEDIUM_HEIGHT = FULL_HEIGHT - 100;
-const LARGE_HEIGHT = FULL_HEIGHT - 400;
+const SMALL_HEIGHT = FULL_HEIGHT + FULL_HEIGHT*0.2; 
+const MEDIUM_HEIGHT = FULL_HEIGHT - FULL_HEIGHT*0.18;
+const LARGE_HEIGHT = FULL_HEIGHT - FULL_HEIGHT*0.47;
 
 
 export default class SwipeablePanel extends React.Component {
@@ -45,7 +45,8 @@ export default class SwipeablePanel extends React.Component {
 			},
 			onPanResponderMove: (evt, gestureState) => {
 				const currentTop = this.pan.y._offset + gestureState.dy;
-				if (currentTop > 0) this.pan.setValue({ x: 0, y: gestureState.dy });
+				if ( this.pan.y._value < 0 &&  this.pan.y._offset === LARGE_HEIGHT) ;
+				else if (currentTop > 0) this.pan.setValue({ x: 0, y: gestureState.dy });
 			},
 			onPanResponderRelease: (evt, { vx, vy }) => {
 				this.pan.flattenOffset();
